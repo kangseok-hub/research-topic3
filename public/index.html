@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>세특 주제 선정 및 예상 보고서 작성 도우미</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --indigo-50: #eef2ff;
+    --indigo-100: #e0e7ff;
+    --indigo-600: #4f46e5;
+    --indigo-700: #4338ca;
+    --indigo-900: #1e1b4b;
+    --emerald-50: #ecfdf5;
+    --emerald-100: #d1fae5;
+    --emerald-500: #10b981;
+    --emerald-600: #059669;
+    --emerald-700: #047857;
+    --amber-50: #fffbeb;
+    --amber-100: #fef3c7;
+    --amber-500: #f59e0b;
+    --amber-800: #92400e;
+    --amber-900: #78350f;
+    --rose-50: #fff1f2;
+    --rose-100: #ffe4e6;
+    --rose-200: #fecdd3;
+    --rose-600: #e11d48;
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+  }
+
+  html, body { height: 100%; font-family: 'Noto Sans KR', 'Inter', sans-serif; background: var(--slate-50); color: var(--slate-900); }
+
+  .app { display: flex; min-height: 100vh; }
+
+  /* ─── Sidebar ─── */
+  .sidebar {
+    width: 280px; min-width: 280px; background: #fff; border-right: 1px solid var(--slate-200);
+    display: flex; flex-direction: column; padding: 28px 20px; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .sidebar-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+  .sidebar-logo-icon {
+    width: 42px; height: 42px; background: var(--indigo-600); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px;
+    box-shadow: 0 4px 14px rgba(79,70,229,.3); flex-shrink: 0;
+  }
+  .sidebar-title { font-size: 14px; font-weight: 800; color: var(--slate-800); line-height: 1.4; }
+
+  .phase-nav { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .phase-item {
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px;
+    transition: background .2s, color .2s; color: var(--slate-400); cursor: default;
+  }
+  .phase-item.active { background: var(--indigo-50); color: var(--indigo-700); }
+  .phase-badge {
+    width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0;
+    background: var(--slate-100); color: var(--slate-400);
+  }
+  .phase-item.active .phase-badge { background: var(--indigo-600); color: #fff; }
+  .phase-item.completed .phase-badge { background: var(--emerald-500); color: #fff; }
+  .phase-item.completed { color: var(--slate-500); }
+  .phase-label { font-size: 13px; font-weight: 600; }
+
+  .sidebar-footer { margin-top: auto; padding-top: 24px; border-top: 1px solid var(--slate-100); }
+  .btn-reset {
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;
+    background: var(--rose-50); color: var(--rose-600); border: 1px solid var(--rose-200);
+    transition: background .2s; margin-bottom: 16px;
+  }
+  .btn-reset:hover { background: var(--rose-100); }
+  .credit-box { background: var(--slate-50); border-radius: 10px; padding: 12px 14px; border: 1px solid var(--slate-100); }
+  .credit-box .label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; color: var(--slate-400); margin-bottom: 4px; }
+  .credit-box .name { font-size: 12px; font-weight: 600; color: var(--slate-600); line-height: 1.5; }
+  .credit-box .name span { color: var(--indigo-600); }
+
+  /* ─── Main ─── */
+  .main { flex: 1; padding: 40px 48px; overflow-y: auto; }
+  .main-inner { max-width: 860px; margin: 0 auto; }
+
+  /* ─── Card ─── */
+  .card {
+    background: #fff; border-radius: 20px; border: 1px solid var(--slate-100);
+    box-shadow: 0 8px 32px rgba(0,0,0,.06); overflow: hidden; position: relative; margin-bottom: 24px;
+  }
+  .card-header { background: var(--slate-50); border-bottom: 1px solid var(--slate-100); padding: 24px 32px; }
+  .card-header h2 { font-size: 22px; font-weight: 800; color: var(--slate-800); margin-bottom: 4px; }
+  .card-header p { font-size: 14px; color: var(--slate-500); }
+  .card-body { padding: 32px; }
+  .card-footer {
+    background: var(--slate-50); border-top: 1px solid var(--slate-100);
+    padding: 20px 32px; display: flex; justify-content: space-between; align-items: center;
+  }
+
+  /* ─── Loading overlay ─── */
+  .loading-overlay {
+    position: absolute; inset: 0; z-index: 50; background: rgba(255,255,255,.85);
+    backdrop-filter: blur(4px); display: none; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; padding: 40px;
+  }
+  .loading-overlay.show { display: flex; }
+  .spinner-wrap { position: relative; width: 80px; height: 80px; margin-bottom: 24px; }
+  .spinner {
+    width: 80px; height: 80px; border: 4px solid var(--indigo-50); border-top-color: var(--indigo-600);
+    border-radius: 50%; animation: spin .9s linear infinite;
+  }
+  .spinner-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-title { font-size: 18px; font-weight: 800; color: var(--slate-800); margin-bottom: 6px; }
+  .loading-sub { font-size: 13px; color: var(--slate-500); margin-bottom: 20px; }
+  .progress-bar { width: 240px; height: 8px; background: var(--slate-100); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--indigo-600); border-radius: 99px; transition: width .5s ease; width: 0%; }
+  .progress-pct { font-size: 13px; font-weight: 700; color: var(--indigo-600); margin-top: 8px; font-variant-numeric: tabular-nums; }
+
+  /* ─── Form inputs ─── */
+  .field { margin-bottom: 20px; }
+  .field label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--slate-700); margin-bottom: 8px; }
+  .field label .icon { font-size: 15px; }
+  input[type=text], textarea {
+    width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid var(--slate-200);
+    font-size: 14px; font-family: inherit; color: var(--slate-800); background: #fff;
+    transition: border-color .2s, box-shadow .2s; outline: none; resize: none;
+  }
+  input[type=text]:focus, textarea:focus {
+    border-color: var(--indigo-600); box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+  }
+
+  /* ─── Select cards ─── */
+  .select-list { display: flex; flex-direction: column; gap: 12px; }
+  .select-card {
+    text-align: left; padding: 18px 20px; border-radius: 14px; border: 2px solid var(--slate-100);
+    background: var(--slate-50); cursor: pointer; transition: border-color .2s, box-shadow .2s, background .2s;
+    width: 100%;
+  }
+  .select-card:hover { border-color: var(--indigo-100); background: #fff; }
+  .select-card.selected { border-color: var(--indigo-600); background: var(--indigo-50); box-shadow: 0 4px 12px rgba(79,70,229,.12); }
+  .select-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .select-card-title { font-size: 14px; font-weight: 700; color: var(--indigo-900); }
+  .check-icon { font-size: 18px; color: var(--indigo-600); display: none; }
+  .select-card.selected .check-icon { display: inline; }
+  .select-card-desc { font-size: 13px; color: var(--slate-600); line-height: 1.6; }
+  .badge { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+  .badge-indigo { background: var(--indigo-100); color: var(--indigo-700); }
+  .badge-emerald { background: var(--emerald-100); color: var(--emerald-700); }
+
+  /* ─── Refresh btn ─── */
+  .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .list-header h3 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--slate-500); }
+  .btn-refresh {
+    display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
+    color: var(--indigo-600); background: var(--indigo-50); border: none; padding: 6px 12px;
+    border-radius: 8px; cursor: pointer; transition: background .2s;
+  }
+  .btn-refresh:hover { background: var(--indigo-100); }
+  .btn-refresh:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-refresh .ri { display: inline-block; }
+  .btn-refresh.spinning .ri { animation: spin .6s linear infinite; }
+
+  /* ─── Divider field ─── */
+  .field-divider { border-top: 1px solid var(--slate-100); padding-top: 20px; margin-top: 8px; }
+
+  /* ─── Buttons ─── */
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all .2s; border: none; font-family: inherit; }
+  .btn-primary { background: var(--indigo-600); color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,.2); }
+  .btn-primary:hover:not(:disabled) { background: var(--indigo-700); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-secondary { background: #fff; color: var(--slate-700); border: 1.5px solid var(--slate-200); }
+  .btn-secondary:hover { background: var(--slate-50); }
+  .btn-ghost { background: transparent; color: var(--slate-500); padding: 8px 14px; }
+  .btn-ghost:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-ghost:not(:disabled):hover { background: var(--slate-200); }
+
+  /* ─── Tips ─── */
+  .tips { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .tip-box { border-radius: 14px; padding: 16px; display: flex; gap: 12px; }
+  .tip-box.amber { background: var(--amber-50); border: 1px solid var(--amber-100); }
+  .tip-box.indigo { background: var(--indigo-50); border: 1px solid var(--indigo-100); }
+  .tip-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .tip-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .tip-box.amber .tip-title { color: var(--amber-900); }
+  .tip-box.indigo .tip-title { color: var(--indigo-900); }
+  .tip-text { font-size: 12px; line-height: 1.6; }
+  .tip-box.amber .tip-text { color: var(--amber-800); }
+  .tip-box.indigo .tip-text { color: var(--indigo-900); }
+
+  /* ─── Phase 6 result ─── */
+  .result-section { margin-bottom: 40px; }
+  .result-section-title { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 2.5px solid; margin-bottom: 20px; }
+  .result-section-title.indigo { border-color: var(--indigo-600); }
+  .result-section-title.emerald { border-color: var(--emerald-600); }
+  .result-section-title h3 { font-size: 18px; font-weight: 800; color: var(--slate-800); }
+  .result-table { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; border: 1px solid var(--slate-200); box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+  .result-table th { background: var(--slate-50); padding: 14px 20px; text-align: left; font-size: 13px; font-weight: 700; color: var(--slate-600); border-bottom: 1px solid var(--slate-200); }
+  .result-table td { padding: 16px 20px; font-size: 13px; color: var(--slate-700); line-height: 1.7; vertical-align: top; border-bottom: 1px solid var(--slate-100); }
+  .result-table td:first-child { background: rgba(79,70,229,.04); color: var(--indigo-900); font-weight: 700; white-space: pre-line; width: 22%; }
+  .result-table tr:last-child td { border-bottom: none; }
+  .step-item { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
+  .step-item:last-child { margin-bottom: 0; }
+  .step-badge { background: var(--indigo-600); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+  .step-title { font-size: 12px; font-weight: 700; color: var(--slate-900); margin-bottom: 3px; }
+  .step-desc { font-size: 12px; color: var(--slate-600); line-height: 1.6; }
+  .seteuk-box { background: var(--emerald-50); border: 1px solid var(--emerald-100); border-radius: 14px; padding: 28px 32px; }
+  .seteuk-text { font-size: 14px; line-height: 1.9; color: var(--slate-800); font-style: italic; }
+  .action-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 32px; }
+
+  /* ─── API Key Modal ─── */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; display: flex; align-items: center; justify-content: center; }
+  .modal-backdrop.hidden { display: none; }
+  .modal { background: #fff; border-radius: 16px; padding: 32px; max-width: 440px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+  .modal h2 { font-size: 18px; font-weight: 800; color: var(--slate-800); margin-bottom: 8px; }
+  .modal p { font-size: 13px; color: var(--slate-500); line-height: 1.7; margin-bottom: 16px; }
+  .modal-pw { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1.5px solid var(--slate-200); font-size: 13px; font-family: monospace; outline: none; margin-bottom: 6px; box-sizing: border-box; }
+  .modal-pw:focus { border-color: var(--indigo-600); box-shadow: 0 0 0 3px rgba(79,70,229,.1); }
+  .modal-link { font-size: 12px; color: var(--indigo-600); text-decoration: none; display: block; margin-bottom: 18px; }
+  .modal-link:hover { text-decoration: underline; }
+  .modal-btns { display: flex; gap: 10px; }
+  .api-status-btn { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--slate-200); background: var(--slate-50); cursor: pointer; color: var(--slate-500); margin-bottom: 14px; width: 100%; font-family: inherit; transition: background .15s; text-align: left; }
+  .api-status-btn:hover { background: var(--slate-100); }
+  .api-status-btn .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--slate-300); flex-shrink: 0; }
+  .api-status-btn.connected .dot { background: var(--emerald-500); }
+  .api-status-btn.connected { color: var(--emerald-700); border-color: #6ee7b7; background: var(--emerald-50); }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 900px) {
+    .app { flex-direction: column; }
+    .sidebar { width: 100%; min-width: 0; height: auto; position: static; flex-direction: row; flex-wrap: wrap; gap: 12px; border-right: none; border-bottom: 1px solid var(--slate-200); padding: 16px; }
+    .sidebar-logo { margin-bottom: 0; }
+    .phase-nav { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+    .sidebar-footer { display: none; }
+    .main { padding: 20px 16px; }
+    .tips { grid-template-columns: 1fr; }
+    .card-body, .card-header, .card-footer { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">✨</div>
+      <div class="sidebar-title">세특 주제 선정 및<br>예상 보고서 작성 도우미</div>
+    </div>
+    <nav class="phase-nav" id="phaseNav"></nav>
+    <div class="sidebar-footer">
+      <button class="btn-reset" onclick="resetAll()">🔄 처음부터 다시하기</button>
+      <div class="credit-box">
+        <p class="label">Created By</p>
+        <p class="name">숭신고등학교 진로진학상담부<br><span>김강석</span></p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="main-inner">
+      <div class="card" id="mainCard">
+        <!-- Loading overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+          <div class="spinner-wrap">
+            <div class="spinner"></div>
+            <div class="spinner-icon">⏳</div>
+          </div>
+          <div class="loading-title">AI가 내용을 분석하고 있습니다</div>
+          <div class="loading-sub">잠시만 기다려 주세요...</div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="progress-pct" id="progressPct">0%</div>
+        </div>
+
+        <div class="card-header" id="cardHeader"></div>
+        <div class="card-body" id="cardBody"></div>
+        <div class="card-footer">
+          <button class="btn btn-ghost" id="btnBack" onclick="goBack()">← 이전 단계</button>
+          <button class="btn btn-primary" id="btnNext" onclick="goNext()">다음 단계로 →</button>
+        </div>
+      </div>
+
+      <div id="tipsArea"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────
+const PHASES = [
+  { id: 1, title: '기본 정보 입력',   icon: '🎓' },
+  { id: 2, title: '탐구 주제 추천',   icon: '💡' },
+  { id: 3, title: '동기 확인',        icon: '🎯' },
+  { id: 4, title: '핵심 역량 확인',   icon: '✨' },
+  { id: 5, title: '탐구 후속활동',    icon: '📖' },
+  { id: 6, title: '최종 결과 확인',   icon: '✅' },
+];
+
+const TIPS = {
+  1: { expert: "희망 학과와 관련된 최근 이슈나 교과서의 '심화 탐구' 섹션을 참고해 보세요.", writing: "학생의 평소 관심사가 어떻게 교과 활동으로 이어졌는지 보여주는 시작점입니다." },
+  2: { expert: "너무 넓은 주제보다는 실생활의 구체적인 현상을 분석하는 주제가 좋은 평가를 받습니다.", writing: "주제 명칭만으로도 탐구의 깊이와 방향성이 드러나도록 구체적으로 기술하세요." },
+  3: { expert: "단순히 '궁금해서'보다는 '수업 중 배운 ~개념을 확장하기 위해'와 같은 학술적 동기가 좋습니다.", writing: "자기주도적 학습 태도와 지적 호기심이 드러나도록 동기를 서술하는 것이 핵심입니다." },
+  4: { expert: "선택한 역량이 탐구 과정에서 어떻게 발휘되었는지 구체적인 행동 지표로 보여줘야 합니다.", writing: "역량의 명칭보다는 해당 역량을 증명할 수 있는 구체적인 활동 사례를 문장에 녹여내세요." },
+  5: { expert: "탐구로 끝내지 않고 관련 도서를 찾아보거나 실험을 설계하는 등 '확장성'을 보여주세요.", writing: "탐구 이후의 변화와 성장을 언급하여 학업에 대한 열정과 발전 가능성을 강조하세요." },
+};
+
+let currentPhase = 1;
+let isLoading = false;
+let progressInterval = null;
+
+let data = {
+  department: '', interest: '', activities: '',
+  recommendedTopics: '', selectedTopic: '',
+  recommendedMotivations: '', selectedMotivation: '',
+  recommendedCompetencies: '', selectedCompetencies: [],
+  recommendedFollowUps: '', selectedFollowUp: '',
+  seTeukDraft: '', researchPlan: '',
+};
+
+// ── LocalStorage ──────────────────────────────────────
+function save() {
+  localStorage.setItem('seTeukData', JSON.stringify(data));
+  localStorage.setItem('seTeukPhase', String(currentPhase));
+}
+function load() {
+  try {
+    const d = localStorage.getItem('seTeukData');
+    const p = localStorage.getItem('seTeukPhase');
+    if (d) data = JSON.parse(d);
+    if (p) currentPhase = parseInt(p);
+  } catch(e) {}
+}
+
+// ── Claude API ─────────────────────────────────────────
+async function callClaude(prompt, json = true) {
+  const res = await fetch('/api/claude', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const result = await res.json();
+  if (result.error) throw new Error(typeof result.error === 'string' ? result.error : result.error.message);
+  const text = (result.content || []).map(b => b.text || '').join('');
+  if (!json) return text;
+  const clean = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+  return JSON.parse(clean);
+}
+
+async function generateTopics() {
+  return JSON.stringify(await callClaude(`
+희망 학과: ${data.department}
+관심 주제/호기심: ${data.interest}
+기존 활동: ${data.activities}
+
+위 정보를 바탕으로 고등학생 수준의 심화 탐구 주제 3가지를 추천해줘.
+반드시 아래 JSON 형식으로만 응답해줘 (다른 텍스트 없이):
+{"topics":[{"title":"주제명","description":"간략한 설명 및 탐구 방향성"},{"title":"주제명","description":"설명"},{"title":"주제명","description":"설명"}]}
+`));
+}
+
+async function generateMotivations() {
+  return JSON.stringify(await callClaude(`
+확정된 탐구 주제: ${data.selectedTopic}
+
+이 주제를 선정한 '동기'를 학생부 기록에 활용할 수 있도록 다음 3가지 유형으로 구체화해서 제시해줘.
+반드시 아래 JSON 형식으로만 응답해줘 (다른 텍스트 없이):
+{"motivations":[{"type":"교과 수업 연계","content":"내용"},{"type":"시사 문제 연계","content":"내용"},{"type":"독서/실생활 연계","content":"내용"}]}
+`));
+}
+
+async function generateCompetencies() {
+  return JSON.stringify(await callClaude(`
+탐구 주제: ${data.selectedTopic}
+
+이 탐구 활동을 통해 학생이 드러낼 수 있는 핵심 역량(예: 학업역량, 탐구력, 문제해결력, 융합적 사고력 등)을 구체적인 행동 특성과 연결하여 3~4가지 제시해줘.
+반드시 아래 JSON 형식으로만 응답해줘 (다른 텍스트 없이):
+{"competencies":[{"name":"역량명","behavior":"구체적인 행동 특성"}]}
+`));
+}
+
+async function generateFollowUps() {
+  return JSON.stringify(await callClaude(`
+탐구 주제: ${data.selectedTopic}
+
+활동 이후 추가로 호기심을 확장할 수 있는 후속 활동을 제시해줘.
+심화탐구형, 사례분석형, 비교분석형, 심화 독서형, 실생활 적용형 중 3가지 이상의 구체적인 후속 활동 사례를 제시해줘.
+반드시 아래 JSON 형식으로만 응답해줘 (다른 텍스트 없이):
+{"followUps":[{"type":"활동 유형","content":"구체적인 활동 내용"}]}
+`));
+}
+
+async function generateResearchPlan() {
+  return JSON.stringify(await callClaude(`
+다음 정보를 바탕으로 체계적인 탐구 계획서를 완성해줘.
+결과는 반드시 아래 JSON 형식으로만 응답해줘 (다른 텍스트 없이):
+{"plan":[
+  {"category":"주제","content":"구체적 주제"},
+  {"category":"주제 개요","content":"전반적인 개요"},
+  {"category":"주제 선정의 이유\\n(동기)","content":"선택한 동기 구체화"},
+  {"category":"탐구 방법\\n(서울대형 7단계 프레임)","isStepByStep":true,"steps":[
+    {"step":"STEP 1","title":"문제 인식","description":"어떤 현상에 주목했는가?"},
+    {"step":"STEP 2","title":"개념 정의 기반 이해","description":"교과 지식을 어떻게 적용했는가?"},
+    {"step":"STEP 3","title":"탐구·모델링 과정","description":"어떤 방식으로 구조화했는가?"},
+    {"step":"STEP 4","title":"실험·자료 분석","description":"데이터를 어떻게 다루었는가?"},
+    {"step":"STEP 5","title":"논리적 해석","description":"결과에서 어떤 의미를 도출했는가?"},
+    {"step":"STEP 6","title":"전공·사회 확장","description":"이 지식을 어디로 연결했는가?"},
+    {"step":"STEP 7","title":"성찰·개선","description":"무엇을 깨닫고, 다음 단계는 무엇인가?"}
+  ]},
+  {"category":"탐구 내용","content":"주제에 대한 구체적인 탐구 전개 내용"},
+  {"category":"예상 결과","content":"도출될 것으로 기대되는 결과"},
+  {"category":"함양하게 된 역량","content":"선택한 역량 구체화"},
+  {"category":"후속활동","content":"선택한 후속 활동 구체화"}
+]}
+
+[탐구 방법 작성 지침]
+- '서울대형 세특 7단 프레임'을 적용하여 탐구 과정을 구조화해줘.
+- 주제에 따라 특정 단계가 부자연스럽다면 해당 단계는 제외하고 자연스러운 흐름으로 최대 7단계까지 구성해줘.
+- 각 단계의 'description'은 학생이 실제로 수행할 수 있는 구체적인 활동으로 작성해줘.
+
+[정보]
+- 주제: ${data.selectedTopic}
+- 동기: ${data.selectedMotivation}
+- 역량: ${data.selectedCompetencies.join('\n')}
+- 후속활동: ${data.selectedFollowUp}
+`));
+}
+
+async function generateSeTeuk(researchPlan) {
+  return await callClaude(`
+다음 정보를 바탕으로 1000 byte 이내의 교사 관점 세특 개요를 작성해줘.
+특히 '탐구 방법(서울대형 7단계 프레임)'의 구체적인 과정이 문장에 잘 녹아나도록 작성하는 것이 핵심이야.
+
+[정보]
+- 탐구 주제: ${data.selectedTopic}
+- 탐구 동기: ${data.selectedMotivation}
+- 탐구 방법 및 과정: ${researchPlan}
+- 핵심 역량: ${data.selectedCompetencies.join('\n')}
+- 후속 활동: ${data.selectedFollowUp}
+
+[작성 세부 지침]
+1. 구조: [탐구 동기] -> [구체적인 탐구 과정(7단계 프레임 반영)] -> [결과 및 교사의 관찰 내용] -> [핵심 역량] -> [탐구 후속활동] 순서로 유기적으로 연결.
+2. 과정 중심 서술: 단순히 '탐구함'이 아니라, 어떤 문제를 인식하고 어떤 개념을 적용하여 어떻게 모델링/분석했는지 구체적인 '하우(How)'가 드러나게 작성.
+3. 어투: 교사 관점 관찰형. 주어(학생은) 생략. 종결형 어미는 명사형(~임, ~함). 현재형.
+4. 금지어: 네이버/구글/다음→포탈사이트, 유튜브→동영상 공유 플랫폼, Chat GPT→생성형 인공지능.
+5. 중요: 반드시 줄 바꿈 없이 하나의 단락으로만 작성해줘. JSON 형식이 아닌 일반 텍스트로 작성해줘.
+`, false);
+}
+
+// ── Loading ─────────────────────────────────────────────
+function startLoading() {
+  isLoading = true;
+  let pct = 0;
+  document.getElementById('loadingOverlay').classList.add('show');
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressPct').textContent = '0%';
+  document.getElementById('btnNext').disabled = true;
+  progressInterval = setInterval(() => {
+    if (pct < 93) { pct += Math.random() * 4; pct = Math.min(pct, 93); }
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = Math.round(pct) + '%';
+  }, 400);
+}
+function stopLoading() {
+  isLoading = false;
+  clearInterval(progressInterval);
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressPct').textContent = '100%';
+  setTimeout(() => { document.getElementById('loadingOverlay').classList.remove('show'); }, 400);
+  render();
+}
+
+// ── Navigation ──────────────────────────────────────────
+function canGoNext() {
+  if (currentPhase === 1) return data.department && data.interest;
+  if (currentPhase === 2) return !!data.selectedTopic;
+  if (currentPhase === 3) return !!data.selectedMotivation;
+  if (currentPhase === 4) return data.selectedCompetencies.length > 0;
+  if (currentPhase === 5) return !!data.selectedFollowUp;
+  return true;
+}
+
+async function goNext() {
+  if (!canGoNext() || isLoading) return;
+  if (currentPhase === 6) return;
+
+  // sync textarea values before going next
+  syncInputs();
+
+  startLoading();
+  try {
+    if (currentPhase === 1) {
+      if (!data.recommendedTopics) data.recommendedTopics = await generateTopics();
+      currentPhase = 2;
+    } else if (currentPhase === 2) {
+      if (!data.recommendedMotivations) data.recommendedMotivations = await generateMotivations();
+      currentPhase = 3;
+    } else if (currentPhase === 3) {
+      if (!data.recommendedCompetencies) data.recommendedCompetencies = await generateCompetencies();
+      currentPhase = 4;
+    } else if (currentPhase === 4) {
+      if (!data.recommendedFollowUps) data.recommendedFollowUps = await generateFollowUps();
+      currentPhase = 5;
+    } else if (currentPhase === 5) {
+      if (!data.researchPlan || !data.seTeukDraft) {
+        data.researchPlan = await generateResearchPlan();
+        data.seTeukDraft = await generateSeTeuk(data.researchPlan);
+      }
+      currentPhase = 6;
+    }
+    save();
+  } catch(e) {
+    alert('AI 응답 중 오류가 발생했습니다. 다시 시도해 주세요.\n\n' + e.message);
+  }
+  stopLoading();
+}
+
+async function handleRefresh() {
+  if (isLoading) return;
+  startLoading();
+  try {
+    if (currentPhase === 2) { data.recommendedTopics = await generateTopics(); data.selectedTopic = ''; }
+    if (currentPhase === 3) { data.recommendedMotivations = await generateMotivations(); data.selectedMotivation = ''; }
+    if (currentPhase === 4) { data.recommendedCompetencies = await generateCompetencies(); data.selectedCompetencies = []; }
+    save();
+  } catch(e) {
+    alert('오류가 발생했습니다. 다시 시도해 주세요.');
+  }
+  stopLoading();
+}
+
+function goBack() {
+  if (currentPhase === 1 || isLoading) return;
+  currentPhase--;
+  save();
+  render();
+}
+
+function resetAll() {
+  if (!confirm('모든 내용이 초기화되고 처음부터 다시 시작합니다. 계속하시겠습니까?')) return;
+  data = { department:'',interest:'',activities:'',recommendedTopics:'',selectedTopic:'',recommendedMotivations:'',selectedMotivation:'',recommendedCompetencies:'',selectedCompetencies:[],recommendedFollowUps:'',selectedFollowUp:'',seTeukDraft:'',researchPlan:'' };
+  currentPhase = 1;
+  localStorage.removeItem('seTeukData');
+  localStorage.removeItem('seTeukPhase');
+  render();
+}
+
+function syncInputs() {
+  const dept = document.getElementById('inp_department');
+  const int_ = document.getElementById('inp_interest');
+  const acts = document.getElementById('inp_activities');
+  const sel  = document.getElementById('inp_selectedTopic');
+  const mot  = document.getElementById('inp_selectedMotivation');
+  const fu   = document.getElementById('inp_selectedFollowUp');
+  if (dept) data.department = dept.value;
+  if (int_) data.interest = int_.value;
+  if (acts) data.activities = acts.value;
+  if (sel)  data.selectedTopic = sel.value;
+  if (mot)  data.selectedMotivation = mot.value;
+  if (fu)   data.selectedFollowUp = fu.value;
+  save();
+}
+
+// ── Render ──────────────────────────────────────────────
+function render() {
+  renderSidebar();
+  renderHeader();
+  renderBody();
+  renderFooter();
+  renderTips();
+}
+
+function renderSidebar() {
+  const nav = document.getElementById('phaseNav');
+  nav.innerHTML = PHASES.map(p => {
+    let cls = '';
+    if (p.id === currentPhase) cls = 'active';
+    else if (p.id < currentPhase) cls = 'completed';
+    return `
+    <div class="phase-item ${cls}">
+      <div class="phase-badge">${p.id < currentPhase ? '✓' : p.id}</div>
+      <span class="phase-label">${p.icon} ${p.title}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderHeader() {
+  const subtitles = {
+    1: '희망 학과와 관심 있는 주제를 입력해 주세요.',
+    2: '입력하신 정보를 바탕으로 추천된 주제 중 하나를 선택해 주세요.',
+    3: '탐구 활동의 시작이 될 동기를 선택해 주세요.',
+    4: '강조하고 싶은 역량을 모두 선택해 주세요. (복수 선택 가능)',
+    5: '탐구 이후 심화할 수 있는 후속 활동을 선택해 주세요.',
+    6: '탐구 계획서와 세특 초안이 최종 완성되었습니다.',
+  };
+  const p = PHASES[currentPhase - 1];
+  document.getElementById('cardHeader').innerHTML = `
+    <h2>Phase ${currentPhase}. ${p.title}</h2>
+    <p>${subtitles[currentPhase]}</p>`;
+}
+
+function renderBody() {
+  const body = document.getElementById('cardBody');
+  if (currentPhase === 1) { body.innerHTML = renderPhase1(); }
+  else if (currentPhase === 2) { body.innerHTML = renderPhase2(); }
+  else if (currentPhase === 3) { body.innerHTML = renderPhase3(); }
+  else if (currentPhase === 4) { body.innerHTML = renderPhase4(); }
+  else if (currentPhase === 5) { body.innerHTML = renderPhase5(); }
+  else if (currentPhase === 6) { body.innerHTML = renderPhase6(); }
+  attachListeners();
+}
+
+function renderPhase1() {
+  return `
+  <div class="field">
+    <label><span class="icon">🎓</span> 희망 학과</label>
+    <input type="text" id="inp_department" placeholder="예: 컴퓨터공학과, 생명과학과 등" value="${esc(data.department)}" oninput="data.department=this.value;save();updateNextBtn()">
+  </div>
+  <div class="field">
+    <label><span class="icon">💡</span> 평소 탐구하고자 하는 주제나 호기심</label>
+    <textarea id="inp_interest" rows="3" placeholder="예: 인공지능의 윤리적 문제, 유전자 가위 기술의 발전 등" oninput="data.interest=this.value;save();updateNextBtn()">${esc(data.interest)}</textarea>
+  </div>
+  <div class="field">
+    <label><span class="icon">📋</span> 기존에 해본 관련된 활동 (선택 사항)</label>
+    <textarea id="inp_activities" rows="3" placeholder="예: 수학 시간에 배운 미분 개념을 활용한 물리 문제 해결 등" oninput="data.activities=this.value;save()">${esc(data.activities)}</textarea>
+  </div>`;
+}
+
+function renderPhase2() {
+  let cards = '';
+  try {
+    const parsed = JSON.parse(data.recommendedTopics);
+    cards = parsed.topics.map(t => `
+      <button class="select-card ${data.selectedTopic === t.title ? 'selected' : ''}" onclick="selectTopic(${JSON.stringify(t.title)})">
+        <div class="select-card-head">
+          <span class="select-card-title">${esc(t.title)}</span>
+          <span class="check-icon">✔️</span>
+        </div>
+        <p class="select-card-desc">${esc(t.description)}</p>
+      </button>`).join('');
+  } catch(e) { cards = '<p style="color:red;font-size:13px;">데이터 오류</p>'; }
+
+  return `
+  <div class="list-header">
+    <h3>추천 주제 리스트</h3>
+    <button class="btn-refresh" id="refreshBtn" onclick="handleRefresh()"><span class="ri">🔄</span> 새로운 주제 추천받기</button>
+  </div>
+  <div class="select-list">${cards}</div>
+  <div class="field field-divider">
+    <label>직접 수정하거나 확정된 주제</label>
+    <input type="text" id="inp_selectedTopic" value="${esc(data.selectedTopic)}" placeholder="위 추천 주제를 클릭하거나 직접 입력하세요." oninput="data.selectedTopic=this.value;save();updateNextBtn()">
+  </div>`;
+}
+
+function renderPhase3() {
+  let cards = '';
+  try {
+    const parsed = JSON.parse(data.recommendedMotivations);
+    cards = parsed.motivations.map(m => `
+      <button class="select-card ${data.selectedMotivation === m.content ? 'selected' : ''}" onclick="selectMotivation(${JSON.stringify(m.content)})">
+        <span class="badge badge-indigo">${esc(m.type)}</span>
+        <div class="select-card-head" style="margin-bottom:0">
+          <span></span><span class="check-icon">✔️</span>
+        </div>
+        <p class="select-card-desc">${esc(m.content)}</p>
+      </button>`).join('');
+  } catch(e) { cards = '<p style="color:red;font-size:13px;">데이터 오류</p>'; }
+
+  return `
+  <div class="list-header">
+    <h3>추천 동기 리스트</h3>
+    <button class="btn-refresh" id="refreshBtn" onclick="handleRefresh()"><span class="ri">🔄</span> 새로운 동기 추천받기</button>
+  </div>
+  <div class="select-list">${cards}</div>
+  <div class="field field-divider">
+    <label>선택한 탐구 동기 수정</label>
+    <textarea id="inp_selectedMotivation" rows="4" placeholder="위 유형 중 하나를 선택하거나 내용을 다듬어 입력해 주세요." oninput="data.selectedMotivation=this.value;save();updateNextBtn()">${esc(data.selectedMotivation)}</textarea>
+  </div>`;
+}
+
+function renderPhase4() {
+  let cards = '';
+  try {
+    const parsed = JSON.parse(data.recommendedCompetencies);
+    cards = parsed.competencies.map(c => {
+      const key = `${c.name}: ${c.behavior}`;
+      const sel = data.selectedCompetencies.includes(key);
+      return `
+      <button class="select-card ${sel ? 'selected' : ''}" onclick="toggleCompetency(${JSON.stringify(key)})">
+        <div class="select-card-head">
+          <span class="select-card-title">${esc(c.name)}</span>
+          <span class="check-icon">✔️</span>
+        </div>
+        <p class="select-card-desc">${esc(c.behavior)}</p>
+      </button>`;
+    }).join('');
+  } catch(e) { cards = '<p style="color:red;font-size:13px;">데이터 오류</p>'; }
+
+  return `
+  <div class="list-header">
+    <h3>추천 역량 리스트</h3>
+    <button class="btn-refresh" id="refreshBtn" onclick="handleRefresh()"><span class="ri">🔄</span> 새로운 역량 추천받기</button>
+  </div>
+  <div class="select-list">${cards}</div>
+  <div class="field field-divider">
+    <label>선택된 핵심 역량</label>
+    <textarea rows="4" readonly placeholder="위 역량 카드를 클릭하여 선택해 주세요.">${esc(data.selectedCompetencies.join('\n'))}</textarea>
+  </div>`;
+}
+
+function renderPhase5() {
+  let cards = '';
+  try {
+    const parsed = JSON.parse(data.recommendedFollowUps);
+    cards = parsed.followUps.map(f => `
+      <button class="select-card ${data.selectedFollowUp === f.content ? 'selected' : ''}" onclick="selectFollowUp(${JSON.stringify(f.content)})">
+        <span class="badge badge-emerald">${esc(f.type)}</span>
+        <div class="select-card-head" style="margin-bottom:0">
+          <span></span><span class="check-icon">✔️</span>
+        </div>
+        <p class="select-card-desc">${esc(f.content)}</p>
+      </button>`).join('');
+  } catch(e) { cards = '<p style="color:red;font-size:13px;">데이터 오류</p>'; }
+
+  return `
+  <div class="select-list">${cards}</div>
+  <div class="field field-divider">
+    <label>최종 선택한 후속 활동 수정</label>
+    <textarea id="inp_selectedFollowUp" rows="4" placeholder="실행할 후속 활동 내용을 입력해 주세요." oninput="data.selectedFollowUp=this.value;save();updateNextBtn()">${esc(data.selectedFollowUp)}</textarea>
+  </div>`;
+}
+
+function renderPhase6() {
+  // Research Plan table
+  let planRows = '';
+  try {
+    const planData = JSON.parse(data.researchPlan);
+    planRows = planData.plan.map(item => {
+      let content = '';
+      if (item.isStepByStep && item.steps) {
+        content = item.steps.map(s => `
+          <div class="step-item">
+            <div class="step-badge">${esc(s.step)}</div>
+            <div>
+              <div class="step-title">${esc(s.title)}</div>
+              <div class="step-desc">${esc(s.description)}</div>
+            </div>
+          </div>`).join('');
+      } else {
+        content = `<span>${esc(item.content || '')}</span>`;
+      }
+      return `<tr><td>${esc(item.category)}</td><td>${content}</td></tr>`;
+    }).join('');
+  } catch(e) { planRows = '<tr><td colspan="2" style="text-align:center;color:#999;">데이터를 불러올 수 없습니다.</td></tr>'; }
+
+  return `
+  <div class="result-section">
+    <div class="result-section-title indigo">
+      <span style="font-size:22px">📋</span>
+      <h3>탐구 계획서</h3>
+    </div>
+    <table class="result-table">
+      <thead><tr><th>구분</th><th>내용</th></tr></thead>
+      <tbody>${planRows}</tbody>
+    </table>
+  </div>
+
+  <div class="result-section">
+    <div class="result-section-title emerald">
+      <span style="font-size:22px">✨</span>
+      <h3>세특 초안 (교사 관점)</h3>
+    </div>
+    <div class="seteuk-box">
+      <p class="seteuk-text">${esc(data.seTeukDraft)}</p>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" onclick="downloadTxt()">📄 텍스트로 다운로드</button>
+    <button class="btn btn-secondary" onclick="copySeTeuk()">📋 세특 초안 복사하기</button>
+  </div>`;
+}
+
+function renderFooter() {
+  const back = document.getElementById('btnBack');
+  const next = document.getElementById('btnNext');
+  back.disabled = currentPhase === 1;
+  next.textContent = currentPhase === 6 ? '✅ 탐구 완료' : '다음 단계로 →';
+  updateNextBtn();
+}
+
+function renderTips() {
+  const area = document.getElementById('tipsArea');
+  if (currentPhase >= 6) { area.innerHTML = ''; return; }
+  const t = TIPS[currentPhase];
+  area.innerHTML = `
+  <div class="tips">
+    <div class="tip-box amber">
+      <div class="tip-icon">💡</div>
+      <div>
+        <div class="tip-title">진로쌤의 Tip!</div>
+        <div class="tip-text">${esc(t.expert)}</div>
+      </div>
+    </div>
+    <div class="tip-box indigo">
+      <div class="tip-icon">✨</div>
+      <div>
+        <div class="tip-title">좋은 세특 작성을 위한 Tip</div>
+        <div class="tip-text">${esc(t.writing)}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function updateNextBtn() {
+  const next = document.getElementById('btnNext');
+  if (next) next.disabled = !canGoNext();
+}
+
+function attachListeners() {
+  // inputs that update via oninput already handled inline
+}
+
+// ── Selectors ───────────────────────────────────────────
+function selectTopic(title) {
+  data.selectedTopic = title;
+  save();
+  const inp = document.getElementById('inp_selectedTopic');
+  if (inp) inp.value = title;
+  document.querySelectorAll('.select-card').forEach(c => c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  updateNextBtn();
+}
+function selectMotivation(content) {
+  data.selectedMotivation = content;
+  save();
+  const inp = document.getElementById('inp_selectedMotivation');
+  if (inp) inp.value = content;
+  document.querySelectorAll('.select-card').forEach(c => c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  updateNextBtn();
+}
+function toggleCompetency(key) {
+  const idx = data.selectedCompetencies.indexOf(key);
+  if (idx >= 0) data.selectedCompetencies.splice(idx, 1);
+  else data.selectedCompetencies.push(key);
+  save();
+  const ta = document.querySelector('.field-divider textarea');
+  if (ta) ta.value = data.selectedCompetencies.join('\n');
+  event.currentTarget.classList.toggle('selected', data.selectedCompetencies.includes(key));
+  updateNextBtn();
+}
+function selectFollowUp(content) {
+  data.selectedFollowUp = content;
+  save();
+  const inp = document.getElementById('inp_selectedFollowUp');
+  if (inp) inp.value = content;
+  document.querySelectorAll('.select-card').forEach(c => c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  updateNextBtn();
+}
+
+// ── Download ────────────────────────────────────────────
+function downloadTxt() {
+  let planText = '';
+  try {
+    const d = JSON.parse(data.researchPlan);
+    planText = d.plan.map(item => {
+      if (item.isStepByStep && item.steps) {
+        return `[${item.category}]\n` + item.steps.map(s => `  ${s.step}. ${s.title}: ${s.description}`).join('\n');
+      }
+      return `[${item.category}]\n${item.content}`;
+    }).join('\n\n');
+  } catch(e) { planText = data.researchPlan; }
+
+  const content = `[탐구 계획서]\n\n${planText}\n\n${'─'.repeat(40)}\n\n[세특 초안 (교사 관점)]\n\n${data.seTeukDraft}`;
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `탐구결과_${data.selectedTopic.replace(/\s+/g,'_')}.txt`;
+  a.click();
+}
+
+function copySeTeuk() {
+  navigator.clipboard.writeText(data.seTeukDraft).then(() => alert('세특 초안이 복사되었습니다!'));
+}
+
+// ── Utility ─────────────────────────────────────────────
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Init ────────────────────────────────────────────────
+load();
+render();
+</script>
+</body>
+</html>
