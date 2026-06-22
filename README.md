@@ -56,3 +56,4 @@ seteuk-vercel/
 - API 키는 절대 `index.html`이나 코드에 직접 넣지 마세요.
 - Vercel 환경변수로만 관리하면 안전합니다.
 - API 사용량에 따라 요금이 발생할 수 있습니다.
+-
